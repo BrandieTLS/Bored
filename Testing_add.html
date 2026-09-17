@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spending adder</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 80px;
+        }
+
+        .plan {
+            margin-top: 10px;
+        }
+
+        .plan input {
+            width: auto;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Add spending</h1>
+
+    <form  action="Testing_add.php" method="POST">
+
+        <label>Item Name</label>
+        <input type="text" name="name" required>
+
+        <label>Purchase Date</label>
+        <input type="date" name="date" id="date" required>
+
+        <label>Category </label>
+
+        <div class="category">
+            <input type="radio" name="category" value="1" required>
+            Food
+        </div>
+
+        <div class="category">
+            <input type="radio" name="category" value="2">
+            Craft
+        </div>
+
+        <div class="category">
+            <input type="radio" name="plan" value="3" >
+            Drinks
+        </div>
+
+        <label>Price</label>
+        <input type="text" name="amount" id="amount" required>
+
+        <label>Notes</label>
+<textarea
+    name="notes"
+    placeholder="Add any additional information..."
+></textarea>
+
+        <button type="submit">Add </button>
+
+    </form>
+</body>
+</html>
