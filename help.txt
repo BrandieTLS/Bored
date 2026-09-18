@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Table</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #020202;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .view-button {
+            padding: 8px 15px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .view-button:hover {
+            background-color: #b30000;
+        }
+
+        #message {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Data Table</h1>
+
+    <div class="search-box">
+        <input
+            type="text"
+            id="search"
+            placeholder="Search customer or phone number"
+            onkeyup="filterCustomers()"
+        >
+    </div>
+
+    <div class="filter-section">
+
+    <label for="outletFilter">
+        Filter by Outlet:
+    </label>
+
+    <select id="outletfilter" onchange="filteroutlet()">
+        <option value="ALL"> ALL </option>
+         <option value="Boon Lay (LM 2)"> Boon Lay (LM 2)</option>
+         <option value="Bishan (LM 4)"> Bishan (LM 4) </option>
+         <option value="Boon Keng (LM 5)"> Boon Keng (LM 5) </option>
+         <option value="Simei (LM 6)"> Simei (LM 6) </option>
+         <option value="Jurong East (LM 7)"> Jurong East (LM 7) </option>
+         <option value="SengKang (LM 8)"> SengKang (LM 8) </option>
+    </select>
+
+</div>
+
+    
+
+    <table id="Data Table">
+
+        <thead>
+            <tr>
+                <th>Customer Name</th>
+                <th>Customer Phone  Number</th>
+                <th>Brought at</th>
+                <th>Attended by</th>
+                <th>Phone Model</th>
+                <th>imei</th>
+                <th>purchase_date</th>
+            </tr>
+        </thead>
+
+        <tbody id="customerList">
+            <!-- Customers will be loaded here -->
+        </tbody>
+
+    </table>
+
+    <div id="message">Loading customers...</div>
+
+
+    <script>
+        let customers = [];
+
+
+        async function loadCustomers() {
+
+            const message = document.getElementById("message");
+            const customerList = document.getElementById("customerList");
+
+            try {
+
+                const response = await fetch("databaseview.php");
+
+                const data = await response.json();
+
+                if (!data.success) {
+
+                    message.textContent = data.message;
+                    return;
+
+                }
+
+                customers = data.data;
+
+                displayCustomers(customers);
+
+                message.textContent = "";
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.textContent = "Something went wrong.";
+
+            }
+
+        }
+
+
+        function displayCustomers(customerData) {
+
+            const customerList =
+                document.getElementById("customerList");
+
+            customerList.innerHTML = "";
+
+            customerData.forEach(function(customer) {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${customer.cust_name}</td>
+
+                    <td>${customer.cust_phone}</td>
+
+                    <td>${customer.outlet}</td>
+
+                     <td>${customer.attendee}</td>
+
+                     <td>${customer.model}</td>
+
+                     <td>${customer.imei}</td>
+
+                     <td>${customer.purchase_date}</td>
+
+                `;
+
+                customerList.appendChild(row);
+
+            });
+
+        }
+
+
+        function filteroutlet(broughtAt) {
+            const outlet = broughtAt || document.getElementById("outletfilter").value;
+
+    const table = document.getElementById("Data Table");
+            const rows = table.getElementsByTagName("tr");
+            rows.forEach(row => {
+                const rowOutlet = row.cells[3].textContent;
+                if (outlet === "ALL" || rowOutlet === outlet) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+            document.getElementById("outletfilter").addEventListener("change", function() {
+                const selectedOutlet = this.value;
+                filteroutlet(selectedOutlet);
+            });
+        }
+       
+
+        function filterCustomers() {
+
+            const search =
+                document.getElementById("search")
+                .value
+                .toLowerCase();
+
+            const filteredCustomers = customers.filter(function(customer) {
+
+                return (
+                    customer.cust_name.toLowerCase().includes(search) ||
+                    customer.cust_phone.includes(search)
+                );
+
+            });
+
+            displayCustomers(filteredCustomers);
+
+        }
+
+
+        loadCustomers();
+
+
+    </script>
+
+</body>
+</html>

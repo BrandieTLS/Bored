@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Warranty Table</title>
+
+    <style>
+
+        /* =========================
+           FILTER BUTTON
+        ========================= */
+
+        .filter-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .filter-button {
+            padding: 10px 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filter-button:hover {
+            background: #f5f5f5;
+        }
+
+
+        /* =========================
+           FILTER MENU
+        ========================= */
+
+        .filter-menu {
+            display: none;
+
+            position: absolute;
+            top: 45px;
+            left: 0;
+
+            width: 280px;
+            max-height: 500px;
+
+            overflow-y: auto;
+
+            background: white;
+
+            border: 1px solid #ccc;
+            border-radius: 8px;
+
+            padding: 15px;
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+            z-index: 999;
+        }
+
+        .filter-menu.show {
+            display: block;
+        }
+
+
+        /* =========================
+           COLUMN FILTER
+        ========================= */
+
+        .filter-column {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+
+            border-bottom: 1px solid #eee;
+        }
+
+        .filter-column:last-child {
+            border-bottom: none;
+        }
+
+        .filter-column-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 5px 0;
+
+            font-size: 14px;
+        }
+
+        .filter-option input {
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           BUTTONS
+        ========================= */
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+
+            margin-top: 10px;
+        }
+
+        .apply-filter {
+            flex: 1;
+
+            padding: 9px;
+
+            border: none;
+            border-radius: 5px;
+
+            background: #222;
+            color: white;
+
+            cursor: pointer;
+        }
+
+        .clear-filter {
+            flex: 1;
+
+            padding: 9px;
+
+            border: 1px solid #ccc;
+            border-radius: 5px;
+
+            background: white;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           TABLE
+        ========================= */
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f5f5;
+        }
+
+
+        /* =========================
+           NO RESULTS
+        ========================= */
+
+        #noResults {
+            display: none;
+
+            text-align: center;
+            padding: 20px;
+
+            color: #666;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================
+         FILTER BUTTON
+    ====================================== -->
+
+    <div class="filter-container">
+
+        <button
+            type="button"
+            class="filter-button"
+            onclick="toggleFilter()"
+        >
+            Filter ▼
+        </button>
+
+
+        <!-- =====================================
+             FILTER MENU
+        ====================================== -->
+
+        <div
+            id="filterMenu"
+            class="filter-menu"
+        >
+
+            <!-- Filters will automatically
+                 be generated here -->
+
+            <div id="filterOptions"></div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="filter-actions">
+
+                <button
+                    type="button"
+                    class="apply-filter"
+                    onclick="applyFilters()"
+                >
+                    Apply
+                </button>
+
+                <button
+                    type="button"
+                    class="clear-filter"
+                    onclick="clearFilters()"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================
+         TABLE
+    ====================================== -->
+
+    <table id="warrantyTable">
+
+        <thead>
+
+            <tr>
+
+                <th>ID</th>
+
+                <th>Customer Name</th>
+
+                <th>Phone</th>
+
+                <th>IMEI</th>
+
+                <th>Model</th>
+
+                <th>Status</th>
+
+                <th>Outlet</th>
+
+                <th>Sales Attendant</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody>
+
+            <tr>
+
+                <td>1</td>
+
+                <td>John</td>
+
+                <td>91235467</td>
+
+                <td>123456789</td>
+
+                <td>Samsung A17 5G</td>
+
+                <td>Active</td>
+
+                <td>Outlet A</td>
+
+                <td>Ali</td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>2</td>
+
+                <td>Mary</td>
+
+                <td>98765432</td>
+
+                <td>987654321</td>
+
+                <td>iPhone 16</td>
+
+                <td>Inactive</td>
+
+                <td>Outlet B</td>
+
+                <td>John</td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>3</td>
+
+                <td>John</td>
+
+                <td>91234567</td>
+
+                <td>555555555</td>
+
+                <td>Samsung A17 5G</td>
+
+                <td>Active</td>
+
+                <td>Outlet A</td>
+
+                <td>John</td>
+
+            </tr>
+
+
+            <tr>
+
+                <td>4</td>
+
+                <td>Sarah</td>
+
+                <td>98887777</td>
+
+                <td>444444444</td>
+
+                <td>iPhone 15</td>
+
+                <td>Active</td>
+
+                <td>Outlet B</td>
+
+                <td>Ali</td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+
+    <div id="noResults">
+        No results found.
+    </div>
+
+
+
+    <!-- =====================================
+         JAVASCRIPT
+    ====================================== -->
+
+    <script>
+
+        const table =
+            document.getElementById("warrantyTable");
+
+        const filterMenu =
+            document.getElementById("filterMenu");
+
+        const filterOptions =
+            document.getElementById("filterOptions");
+
+        const noResults =
+            document.getElementById("noResults");
+
+
+        /*
+        ========================================
+        OPEN / CLOSE FILTER
+        ========================================
+        */
+
+        function toggleFilter() {
+
+            filterMenu.classList.toggle("show");
+
+        }
+
+
+        /*
+        ========================================
+        CREATE FILTERS AUTOMATICALLY
+        ========================================
+
+        This reads the table headers and
+        automatically creates a filter for
+        every column.
+        */
+
+        function createFilters() {
+
+            const headers =
+                table.querySelectorAll("thead th");
+
+            filterOptions.innerHTML = "";
+
+
+            headers.forEach((header, columnIndex) => {
+
+                const columnName =
+                    header.textContent.trim();
+
+
+                /*
+                Get all unique values
+                from this column.
+                */
+
+                const values = new Set();
+
+
+                const rows =
+                    table.querySelectorAll("tbody tr");
+
+
+                rows.forEach(row => {
+
+                    const cell =
+                        row.cells[columnIndex];
+
+                    if (cell) {
+
+                        const value =
+                            cell.textContent.trim();
+
+                        values.add(value);
+
+                    }
+
+                });
+
+
+                /*
+                Create column section
+                */
+
+                const columnDiv =
+                    document.createElement("div");
+
+                columnDiv.className =
+                    "filter-column";
+
+
+                /*
+                Column title
+                */
+
+                const title =
+                    document.createElement("div");
+
+                title.className =
+                    "filter-column-title";
+
+                title.textContent =
+                    columnName;
+
+
+                columnDiv.appendChild(title);
+
+
+                /*
+                Create checkbox for
+                every unique value
+                */
+
+                [...values]
+                    .sort()
+                    .forEach(value => {
+
+                        const label =
+                            document.createElement("label");
+
+                        label.className =
+                            "filter-option";
+
+
+                        const checkbox =
+                            document.createElement("input");
+
+                        checkbox.type =
+                            "checkbox";
+
+                        checkbox.dataset.column =
+                            columnIndex;
+
+                        checkbox.dataset.value =
+                            value;
+
+
+                        label.appendChild(checkbox);
+
+
+                        const text =
+                            document.createTextNode(
+                                value || "(Blank)"
+                            );
+
+                        label.appendChild(text);
+
+
+                        columnDiv.appendChild(label);
+
+                    });
+
+
+                filterOptions.appendChild(
+                    columnDiv
+                );
+
+            });
+
+        }
+
+
+        /*
+        ========================================
+        APPLY FILTERS
+        ========================================
+        */
+
+        function applyFilters() {
+
+            /*
+            Store selected values
+            by column.
+            */
+
+            const selectedFilters = {};
+
+
+            const checked =
+                filterOptions.querySelectorAll(
+                    "input[type='checkbox']:checked"
+                );
+
+
+            checked.forEach(checkbox => {
+
+                const column =
+                    checkbox.dataset.column;
+
+                const value =
+                    checkbox.dataset.value;
+
+
+                if (!selectedFilters[column]) {
+
+                    selectedFilters[column] = [];
+
+                }
+
+
+                selectedFilters[column].push(
+                    value
+                );
+
+            });
+
+
+            /*
+            Check every table row.
+            */
+
+            const rows =
+                table.querySelectorAll(
+                    "tbody tr"
+                );
+
+
+            let visibleRows = 0;
+
+
+            rows.forEach(row => {
+
+                let showRow = true;
+
+
+                /*
+                Check every filtered column.
+                */
+
+                Object.keys(
+                    selectedFilters
+                ).forEach(columnIndex => {
+
+                    if (!showRow) {
+                        return;
+                    }
+
+
+                    const cell =
+                        row.cells[columnIndex];
+
+                    if (!cell) {
+                        return;
+                    }
+
+
+                    const cellValue =
+                        cell.textContent.trim();
+
+
+                    /*
+                    Multiple selections
+                    within the same column use OR.
+
+                    Example:
+
+                    Status:
+                    ☑ Active
+                    ☑ Inactive
+
+                    means Active OR Inactive.
+                    */
+
+                    const matches =
+                        selectedFilters[columnIndex]
+                            .includes(cellValue);
+
+
+                    if (!matches) {
+
+                        showRow = false;
+
+                    }
+
+                });
+
+
+                if (showRow) {
+
+                    row.style.display = "";
+
+                    visibleRows++;
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+
+            /*
+            Show "No results"
+            */
+
+            if (visibleRows === 0) {
+
+                noResults.style.display =
+                    "block";
+
+            } else {
+
+                noResults.style.display =
+                    "none";
+
+            }
+
+
+            /*
+            Close menu
+            */
+
+            filterMenu.classList.remove(
+                "show"
+            );
+
+        }
+
+
+        /*
+        ========================================
+        CLEAR FILTERS
+        ========================================
+        */
+
+        function clearFilters() {
+
+            /*
+            Uncheck everything
+            */
+
+            const checkboxes =
+                filterOptions.querySelectorAll(
+                    "input[type='checkbox']"
+                );
+
+
+            checkboxes.forEach(checkbox => {
+
+                checkbox.checked = false;
+
+            });
+
+
+            /*
+            Show every row
+            */
+
+            const rows =
+                table.querySelectorAll(
+                    "tbody tr"
+                );
+
+
+            rows.forEach(row => {
+
+                row.style.display = "";
+
+            });
+
+
+            noResults.style.display =
+                "none";
+
+        }
+
+
+        /*
+        ========================================
+        CREATE FILTERS WHEN PAGE LOADS
+        ========================================
+        */
+
+        createFilters();
+
+    </script>
+
+
+</body>
+
+</html>
