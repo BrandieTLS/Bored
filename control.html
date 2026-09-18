@@ -8,8 +8,31 @@
     <title>Spending List</title>
 
 
-    <style>
+    <!-- ============================================================
+         SHEETJS
+         Used to create Excel files
+         ============================================================ -->
 
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+
+    <!-- ============================================================
+         JSPDF
+         Used to create PDF files
+         ============================================================ -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+    <!-- ============================================================
+         AUTOTABLE
+         Used to create tables inside PDF
+         ============================================================ -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+
+    <style>
 
         body {
 
@@ -32,29 +55,6 @@
 
         }
 
-
-        .search-box {
-
-            margin-bottom: 20px;
-
-        }
-
-
-        .search-box input {
-
-            padding: 10px;
-
-            width: 300px;
-
-            border: 1px solid #ccc;
-
-            border-radius: 5px;
-
-            font-size: 14px;
-
-        }
-
-     
         .filters {
 
             display: flex;
@@ -65,11 +65,26 @@
 
             flex-wrap: wrap;
 
+            align-items: center;
+
         }
 
 
-        .filters select,
-        .filters input {
+        .name-filter {
+
+            padding: 10px;
+
+            width: 250px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            font-size: 14px;
+
+        }
+
+        .month-filter {
 
             padding: 10px;
 
@@ -79,8 +94,110 @@
 
             background-color: white;
 
+            font-size: 14px;
+
         }
 
+        .category-filter {
+
+            position: relative;
+
+        }
+
+
+        .category-button {
+
+            padding: 10px 15px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            background-color: white;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+
+        .category-button:hover {
+
+            background-color: #eeeeee;
+
+        }
+
+
+        .category-menu {
+
+            display: none;
+
+            position: absolute;
+
+            top: 45px;
+
+            left: 0;
+
+            width: 230px;
+
+            max-height: 300px;
+
+            overflow-y: auto;
+
+            background-color: white;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            padding: 10px;
+
+            z-index: 1000;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+
+        }
+
+
+        .category-title {
+
+            font-weight: bold;
+
+            padding-bottom: 8px;
+
+            border-bottom: 1px solid #ddd;
+
+            margin-bottom: 8px;
+
+        }
+
+
+        .category-option {
+
+            display: block;
+
+            padding: 8px;
+
+            cursor: pointer;
+
+            border-radius: 4px;
+
+        }
+
+
+        .category-option:hover {
+
+            background-color: #f1f1f1;
+
+        }
+
+
+        .category-option input {
+
+            margin-right: 8px;
+
+        }
 
         .clear-button {
 
@@ -96,6 +213,8 @@
 
             cursor: pointer;
 
+            font-size: 14px;
+
         }
 
 
@@ -105,7 +224,53 @@
 
         }
 
+        .export-buttons {
 
+            display: flex;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .export-button {
+
+            padding: 10px 15px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            color: white;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+
+        .export-button:hover {
+
+            opacity: 0.85;
+
+        }
+
+
+        .excel-button {
+
+            background-color: #217346;
+
+        }
+
+
+        .pdf-button {
+
+            background-color: #d32f2f;
+
+        }
 
         .total-box {
 
@@ -124,7 +289,6 @@
             font-weight: bold;
 
         }
-
 
         table {
 
@@ -172,7 +336,6 @@
 
         }
 
-
         .no-data {
 
             text-align: center;
@@ -182,7 +345,6 @@
             color: #777;
 
         }
-
 
     </style>
 
@@ -195,63 +357,122 @@
     <h1>Spending List</h1>
 
 
-    <div class="search-box">
+    <div class="filters">
+
+
+        <!-- NAME -->
 
         <input
             type="text"
-            id="search"
-            placeholder="Search name, category, amount..."
-            onkeyup="filterSpending()"
+            id="nameFilter"
+            class="name-filter"
+            placeholder="Filter by name..."
+            oninput="filterSpending()"
         >
 
-    </div>
 
-    <div class="filters">
+        <!-- CATEGORY -->
 
-        <!-- Category filter -->
-
-        <select
-            id="categoryFilter"
-            onchange="filterSpending()"
-        >
-
-            <option value="">All Categories</option>
-
-        </select>
+        <div class="category-filter">
 
 
-        <!-- Month filter -->
+            <button
+                type="button"
+                class="category-button"
+                onclick="toggleCategoryMenu()"
+            >
+
+                Category ▼
+
+            </button>
+
+
+            <div
+                id="categoryMenu"
+                class="category-menu"
+            >
+
+                <div class="category-title">
+
+                    Select Categories
+
+                </div>
+
+
+                <div id="categoryOptions">
+
+                    <!-- Checkboxes created here -->
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MONTH -->
 
         <input
             type="month"
             id="monthFilter"
+            class="month-filter"
             onchange="filterSpending()"
         >
 
 
-        <!-- Clear filters -->
+        <!-- CLEAR -->
 
         <button
+            type="button"
             class="clear-button"
             onclick="clearFilters()"
         >
+
             Clear Filters
+
         </button>
 
     </div>
 
 
+    <div class="export-buttons">
+
+
+        <button
+            type="button"
+            class="export-button excel-button"
+            onclick="exportExcel()"
+        >
+
+            Download Excel
+
+        </button>
+
+
+        <button
+            type="button"
+            class="export-button pdf-button"
+            onclick="exportPDF()"
+        >
+
+            Download PDF
+
+        </button>
+
+
+    </div>
+
 
     <div class="total-box">
 
         Total Spending:
+
         $<span id="totalAmount">0.00</span>
 
     </div>
 
 
-
-    <table>
+    <table id="spendingTable">
 
         <thead>
 
@@ -274,11 +495,10 @@
 
         <tbody id="spendingList">
 
-            <!-- Data will be inserted here -->
-
         </tbody>
 
     </table>
+
 
     <div id="message">
 
@@ -289,9 +509,13 @@
 
     <script>
 
+
         let spending = [];
 
+        let filteredSpending = [];
+
         async function loadSpending() {
+
 
             const message =
                 document.getElementById("message");
@@ -299,11 +523,10 @@
 
             try {
 
+
                 const response =
                     await fetch("control.php");
 
-
-                // Check if PHP responded correctly
 
                 if (!response.ok) {
 
@@ -318,8 +541,6 @@
                     await response.json();
 
 
-                // Check PHP success
-
                 if (!data.success) {
 
                     message.textContent =
@@ -330,27 +551,26 @@
                 }
 
 
-                // Store database data
-
                 spending = data.data;
 
 
-                // Create category options
+                filteredSpending = spending;
+
 
                 createCategoryFilter();
 
 
-                // Display data
+                displaySpending(
+                    spending
+                );
 
-                displaySpending(spending);
-
-
-                // Remove loading message
 
                 message.textContent = "";
 
 
-            } catch (error) {
+            }
+
+            catch (error) {
 
                 console.error(error);
 
@@ -362,88 +582,315 @@
 
         }
 
-// Filter
 
         function createCategoryFilter() {
 
-            const categoryFilter =
-                document.getElementById("categoryFilter");
+
+            const categoryOptions =
+                document.getElementById(
+                    "categoryOptions"
+                );
 
 
-            // Get all categories
+            categoryOptions.innerHTML = "";
+
 
             const categories =
                 spending.map(function(item) {
 
-                    return String(item.category ?? "");
+                    return String(
+                        item.category ?? ""
+                    );
 
                 });
 
-
-            // Remove duplicates
 
             const uniqueCategories =
                 [...new Set(categories)];
 
 
-            // Sort alphabetically
+            const validCategories =
+                uniqueCategories.filter(function(category) {
 
-            uniqueCategories.sort();
+                    return category !== "";
 
-
-            // Keep "All Categories"
-
-            categoryFilter.innerHTML = `
-                <option value="">All Categories</option>
-            `;
+                });
 
 
-            // Add each category
+            validCategories.sort();
 
-            uniqueCategories.forEach(function(category) {
 
-                if (category === "") {
-                    return;
+            validCategories.forEach(
+                function(category) {
+
+
+                    const label =
+                        document.createElement(
+                            "label"
+                        );
+
+
+                    label.className =
+                        "category-option";
+
+
+                    const checkbox =
+                        document.createElement(
+                            "input"
+                        );
+
+
+                    checkbox.type =
+                        "checkbox";
+
+
+                    checkbox.value =
+                        category;
+
+
+                    checkbox.addEventListener(
+                        "change",
+                        filterSpending
+                    );
+
+
+                    label.appendChild(
+                        checkbox
+                    );
+
+
+                    label.appendChild(
+                        document.createTextNode(
+                            " " + category
+                        )
+                    );
+
+
+                    categoryOptions.appendChild(
+                        label
+                    );
+
+                }
+            );
+
+        }
+
+
+        function toggleCategoryMenu() {
+
+
+            const menu =
+                document.getElementById(
+                    "categoryMenu"
+                );
+
+
+            if (
+                menu.style.display === "block"
+            ) {
+
+                menu.style.display =
+                    "none";
+
+            }
+
+            else {
+
+                menu.style.display =
+                    "block";
+
+            }
+
+        }
+
+
+        document.addEventListener(
+            "click",
+            function(event) {
+
+
+                const categoryFilter =
+                    document.querySelector(
+                        ".category-filter"
+                    );
+
+
+                const menu =
+                    document.getElementById(
+                        "categoryMenu"
+                    );
+
+
+                if (
+                    !categoryFilter.contains(
+                        event.target
+                    )
+                ) {
+
+                    menu.style.display =
+                        "none";
+
                 }
 
+            }
+        );
 
-                const option =
-                    document.createElement("option");
-
-
-                option.value = category;
-
-                option.textContent = category;
+        function getSelectedCategories() {
 
 
-                categoryFilter.appendChild(option);
+            const checkboxes =
+                document.querySelectorAll(
+                    '#categoryOptions input[type="checkbox"]:checked'
+                );
+
+
+            return Array.from(
+                checkboxes
+            ).map(function(checkbox) {
+
+                return checkbox.value
+                    .toLowerCase();
 
             });
 
         }
 
 
-  
+        function filterSpending() {
 
-        function displaySpending(spendingData) {
+
+            const nameSearch =
+                document.getElementById(
+                    "nameFilter"
+                )
+                .value
+                .toLowerCase()
+                .trim();
+
+
+            const selectedCategories =
+                getSelectedCategories();
+
+
+            const selectedMonth =
+                document.getElementById(
+                    "monthFilter"
+                ).value;
+
+
+            filteredSpending =
+                spending.filter(
+                    function(item) {
+
+
+                        const name =
+                            String(
+                                item.name ?? ""
+                            ).toLowerCase();
+
+
+                        const category =
+                            String(
+                                item.category ?? ""
+                            ).toLowerCase();
+
+
+                        const date =
+                            String(
+                                item.date ?? ""
+                            );
+
+
+                        // NAME
+
+                        const matchesName =
+                            name.includes(
+                                nameSearch
+                            );
+
+
+                        // CATEGORY
+
+                        let matchesCategory =
+                            true;
+
+
+                        if (
+                            selectedCategories.length > 0
+                        ) {
+
+                            matchesCategory =
+                                selectedCategories.includes(
+                                    category
+                                );
+
+                        }
+
+
+                        // MONTH
+
+                        let matchesMonth =
+                            true;
+
+
+                        if (
+                            selectedMonth !== ""
+                        ) {
+
+                            matchesMonth =
+                                date.startsWith(
+                                    selectedMonth
+                                );
+
+                        }
+
+
+                        return (
+
+                            matchesName
+
+                            &&
+
+                            matchesCategory
+
+                            &&
+
+                            matchesMonth
+
+                        );
+
+                    }
+                );
+
+
+            displaySpending(
+                filteredSpending
+            );
+
+        }
+
+
+        function displaySpending(
+            spendingData
+        ) {
+
 
             const spendingList =
-                document.getElementById("spendingList");
+                document.getElementById(
+                    "spendingList"
+                );
 
-
-            // Clear existing rows
 
             spendingList.innerHTML = "";
 
 
-            // Reset total
-
             let total = 0;
 
 
-            // No results
+            if (
+                spendingData.length === 0
+            ) {
 
-            if (spendingData.length === 0) {
 
                 spendingList.innerHTML = `
 
@@ -453,7 +900,9 @@
                             colspan="5"
                             class="no-data"
                         >
+
                             No spending records found.
+
                         </td>
 
                     </tr>
@@ -461,8 +910,10 @@
                 `;
 
 
-                document.getElementById("totalAmount")
-                    .textContent = "0.00";
+                document.getElementById(
+                    "totalAmount"
+                ).textContent =
+                    "0.00";
 
 
                 return;
@@ -470,234 +921,112 @@
             }
 
 
-            // Create rows
-
-            spendingData.forEach(function(item) {
-
-
-                // Get amount
-
-                const amount =
-                    parseFloat(item.amount) || 0;
-
-
-                // Add to total
-
-                total += amount;
-
-
-                // Create row
-
-                const row =
-                    document.createElement("tr");
-
-
-                row.innerHTML = `
-
-                    <td>
-                        ${escapeHTML(item.name)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(item.category)}
-                    </td>
-
-                    <td>
-                        $${amount.toFixed(2)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(item.date)}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(item.notes)}
-                    </td>
-
-                `;
-
-
-                spendingList.appendChild(row);
-
-            });
-
-
-            // Display total
-
-            document.getElementById("totalAmount")
-                .textContent = total.toFixed(2);
-
-        }
-
-
-        // FILTER SPENDING
-
-        function filterSpending() {
-
-
-            // Get search value
-
-            const search =
-                document.getElementById("search")
-                    .value
-                    .toLowerCase()
-                    .trim();
-
-
-            // Get category
-
-            const category =
-                document.getElementById("categoryFilter")
-                    .value
-                    .toLowerCase();
-
-
-            // Get month
-
-            const month =
-                document.getElementById("monthFilter")
-                    .value;
-
-
-            // Filter data
-
-            const filteredSpending =
-                spending.filter(function(item) {
-
-
-                    // SEARCH
-
-                    const name =
-                        String(item.name ?? "")
-                            .toLowerCase();
-
-
-                    const itemCategory =
-                        String(item.category ?? "")
-                            .toLowerCase();
+            spendingData.forEach(
+                function(item) {
 
 
                     const amount =
-                        String(item.amount ?? "")
-                            .toLowerCase();
+                        parseFloat(
+                            item.amount
+                        ) || 0;
 
 
-                    const date =
-                        String(item.date ?? "")
-                            .toLowerCase();
+                    total += amount;
 
 
-                    const notes =
-                        String(item.notes ?? "")
-                            .toLowerCase();
+                    const row =
+                        document.createElement(
+                            "tr"
+                        );
 
 
-                    const matchesSearch =
+                    row.innerHTML = `
 
-                        name.includes(search)
+                        <td>
+                            ${escapeHTML(item.name)}
+                        </td>
 
-                        ||
+                        <td>
+                            ${escapeHTML(item.category)}
+                        </td>
 
-                        itemCategory.includes(search)
+                        <td>
+                            $${amount.toFixed(2)}
+                        </td>
 
-                        ||
+                        <td>
+                            ${escapeHTML(item.date)}
+                        </td>
 
-                        amount.includes(search)
+                        <td>
+                            ${escapeHTML(item.notes)}
+                        </td>
 
-                        ||
-
-                        date.includes(search)
-
-                        ||
-
-                        notes.includes(search);
-
-                    // CATEGORE
-                    const matchesCategory =
-
-                        category === ""
-
-                        ||
-
-                        itemCategory === category;
+                    `;
 
 
-            
-                    // MONTH
-               
-
-                    let matchesMonth = true;
-
-
-                    if (month !== "") {
-
-                        /*
-                         * month is YYYY-MM
-                         *
-                         * Example:
-                         * 2026-09
-                         */
-
-                        matchesMonth =
-                            String(item.date ?? "")
-                                .startsWith(month);
-
-                    }
-
-
-                    // FINAL RESULT
-        
-
-                    return (
-
-                        matchesSearch
-
-                        &&
-
-                        matchesCategory
-
-                        &&
-
-                        matchesMonth
-
+                    spendingList.appendChild(
+                        row
                     );
 
-                });
+                }
+            );
 
 
-            // Display filtered data
-
-            displaySpending(filteredSpending);
+            document.getElementById(
+                "totalAmount"
+            ).textContent =
+                total.toFixed(2);
 
         }
 
-
-     
-        // CLEAR FILTERS
 
         function clearFilters() {
 
-            document.getElementById("search")
-                .value = "";
+
+            document.getElementById(
+                "nameFilter"
+            ).value = "";
 
 
-            document.getElementById("categoryFilter")
-                .value = "";
+            document.getElementById(
+                "monthFilter"
+            ).value = "";
 
 
-            document.getElementById("monthFilter")
-                .value = "";
+            const checkboxes =
+                document.querySelectorAll(
+                    '#categoryOptions input[type="checkbox"]'
+                );
 
 
-            displaySpending(spending);
+            checkboxes.forEach(
+                function(checkbox) {
+
+                    checkbox.checked =
+                        false;
+
+                }
+            );
+
+
+            filteredSpending =
+                spending;
+
+
+            displaySpending(
+                spending
+            );
 
         }
 
-        // PREVENT HTML INJECTION
-
         function escapeHTML(value) {
 
-            if (value === null || value === undefined) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
 
                 return "";
 
@@ -706,22 +1035,399 @@
 
             return String(value)
 
-                .replace(/&/g, "&amp;")
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
 
-                .replace(/</g, "&lt;")
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
 
-                .replace(/>/g, "&gt;")
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
 
-                .replace(/"/g, "&quot;")
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
 
-                .replace(/'/g, "&#039;");
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
 
         }
 
 
-   
-        // START
+        function exportExcel() {
 
+
+            // Make sure there is data
+
+            if (
+                filteredSpending.length === 0
+            ) {
+
+                alert(
+                    "There is no data to export."
+                );
+
+                return;
+
+            }
+
+
+            // Create Excel data
+
+            const excelData =
+                filteredSpending.map(
+                    function(item) {
+
+                        return {
+
+                            "Name":
+                                item.name ?? "",
+
+                            "Category":
+                                item.category ?? "",
+
+                            "Amount":
+                                parseFloat(
+                                    item.amount
+                                ) || 0,
+
+                            "Date":
+                                item.date ?? "",
+
+                            "Notes":
+                                item.notes ?? ""
+
+                        };
+
+                    }
+                );
+
+
+            // Create worksheet
+
+            const worksheet =
+                XLSX.utils.json_to_sheet(
+                    excelData
+                );
+
+
+            // Set column widths
+
+            worksheet["!cols"] = [
+
+                { wch: 25 },
+
+                { wch: 20 },
+
+                { wch: 15 },
+
+                { wch: 15 },
+
+                { wch: 40 }
+
+            ];
+
+
+            // Create workbook
+
+            const workbook =
+                XLSX.utils.book_new();
+
+
+            // Add worksheet
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Spending"
+            );
+
+
+            // Generate filename
+
+            const today =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+
+
+            const filename =
+                "spending_report_" +
+                today +
+                ".xlsx";
+
+
+            // DOWNLOAD
+
+            XLSX.writeFile(
+                workbook,
+                filename
+            );
+
+        }
+
+// Export 
+        function exportPDF() {
+
+
+            // Make sure there is data
+
+            if (
+                filteredSpending.length === 0
+            ) {
+
+                alert(
+                    "There is no data to export."
+                );
+
+                return;
+
+            }
+
+
+            // Get jsPDF
+
+            const {
+                jsPDF
+            } = window.jspdf;
+
+
+            // Landscape PDF
+
+            const doc =
+                new jsPDF({
+                    orientation: "landscape",
+                    unit: "mm",
+                    format: "a4"
+                });
+
+
+            doc.setFontSize(18);
+
+            doc.text(
+                "Spending Report",
+                14,
+                15
+            );
+
+
+            let filterText =
+                "Filters: ";
+
+
+            const name =
+                document.getElementById(
+                    "nameFilter"
+                ).value.trim();
+
+
+            const month =
+                document.getElementById(
+                    "monthFilter"
+                ).value;
+
+
+            const categories =
+                getSelectedCategories();
+
+
+            let filterParts = [];
+
+
+            if (name !== "") {
+
+                filterParts.push(
+                    "Name: " + name
+                );
+
+            }
+
+
+            if (
+                categories.length > 0
+            ) {
+
+                filterParts.push(
+                    "Category: " +
+                    categories.join(", ")
+                );
+
+            }
+
+
+            if (month !== "") {
+
+                filterParts.push(
+                    "Month: " + month
+                );
+
+            }
+
+
+            if (
+                filterParts.length === 0
+            ) {
+
+                filterText +=
+                    "All";
+
+            }
+
+            else {
+
+                filterText +=
+                    filterParts.join(" | ");
+
+            }
+
+
+            doc.setFontSize(9);
+
+            doc.text(
+                filterText,
+                14,
+                22
+            );
+
+
+            let total = 0;
+
+
+            filteredSpending.forEach(
+                function(item) {
+
+                    total +=
+                        parseFloat(
+                            item.amount
+                        ) || 0;
+
+                }
+            );
+
+
+            doc.setFontSize(11);
+
+            doc.text(
+                "Total Spending: $" +
+                total.toFixed(2),
+                14,
+                30
+            );
+
+            const tableData =
+                filteredSpending.map(
+                    function(item) {
+
+                        return [
+
+                            item.name ?? "",
+
+                            item.category ?? "",
+
+                            "$" +
+                            (
+                                parseFloat(
+                                    item.amount
+                                ) || 0
+                            ).toFixed(2),
+
+                            item.date ?? "",
+
+                            item.notes ?? ""
+
+                        ];
+
+                    }
+                );
+
+
+            doc.autoTable({
+
+                startY: 36,
+
+                head: [[
+
+                    "Name",
+
+                    "Category",
+
+                    "Amount",
+
+                    "Date",
+
+                    "Notes"
+
+                ]],
+
+                body: tableData,
+
+                theme: "grid",
+
+                styles: {
+
+                    fontSize: 8,
+
+                    cellPadding: 3
+
+                },
+
+                headStyles: {
+
+                    fontSize: 8
+
+                },
+
+                columnStyles: {
+
+                    0: {
+                        cellWidth: 40
+                    },
+
+                    1: {
+                        cellWidth: 35
+                    },
+
+                    2: {
+                        cellWidth: 30
+                    },
+
+                    3: {
+                        cellWidth: 30
+                    },
+
+                    4: {
+                        cellWidth: 120
+                    }
+
+                }
+
+            });
+
+            const today =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+
+
+            const filename =
+                "spending_report_" +
+                today +
+                ".pdf";
+
+            doc.save(
+                filename
+            );
+
+        }
 
         loadSpending();
 

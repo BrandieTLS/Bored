@@ -7,7 +7,6 @@ $password = "hi4n^iuoS84OsAi77d.qYC";
 $dbname = "spending";
 $port = 4009;
 
-
 $conn = mysqli_init();
 
 mysqli_ssl_set(
@@ -39,6 +38,9 @@ if (!mysqli_real_connect(
 }
 
 
+// ============================================================
+// GET SPENDING DATA
+// ============================================================
 
 $sql = "SELECT * FROM spending ORDER BY date DESC, name ASC";
 
@@ -54,6 +56,11 @@ if (!$result) {
     exit;
 }
 
+
+// ============================================================
+// STORE DATA
+// ============================================================
+
 $spending = [];
 
 while ($row = $result->fetch_assoc()) {
@@ -62,11 +69,20 @@ while ($row = $result->fetch_assoc()) {
 
 }
 
+
+// ============================================================
+// SEND DATA TO HTML
+// ============================================================
+
 echo json_encode([
     "success" => true,
     "data" => $spending
 ]);
 
+
+// ============================================================
+// CLOSE DATABASE
+// ============================================================
 
 $conn->close();
 
