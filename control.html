@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Spending List</title>
+
+
+    <style>
+
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            max-width: 1100px;
+
+            margin: 50px auto;
+
+            padding: 20px;
+
+            background-color: #f5f5f5;
+
+        }
+
+
+        h1 {
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .search-box {
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .search-box input {
+
+            padding: 10px;
+
+            width: 300px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            font-size: 14px;
+
+        }
+
+     
+        .filters {
+
+            display: flex;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .filters select,
+        .filters input {
+
+            padding: 10px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 5px;
+
+            background-color: white;
+
+        }
+
+
+        .clear-button {
+
+            padding: 10px 15px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            background-color: #555;
+
+            color: white;
+
+            cursor: pointer;
+
+        }
+
+
+        .clear-button:hover {
+
+            background-color: #333;
+
+        }
+
+
+
+        .total-box {
+
+            background-color: white;
+
+            padding: 15px;
+
+            margin-bottom: 20px;
+
+            border-radius: 5px;
+
+            border: 1px solid #ddd;
+
+            font-size: 18px;
+
+            font-weight: bold;
+
+        }
+
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            background-color: white;
+
+        }
+
+
+        th,
+        td {
+
+            padding: 14px;
+
+            border-bottom: 1px solid #ddd;
+
+            text-align: left;
+
+        }
+
+
+        th {
+
+            background-color: #333;
+
+            color: white;
+
+        }
+
+
+        tr:hover {
+
+            background-color: #f1f1f1;
+
+        }
+
+        #message {
+
+            margin-top: 20px;
+
+            color: #555;
+
+        }
+
+
+        .no-data {
+
+            text-align: center;
+
+            padding: 20px;
+
+            color: #777;
+
+        }
+
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <h1>Spending List</h1>
+
+
+    <div class="search-box">
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Search name, category, amount..."
+            onkeyup="filterSpending()"
+        >
+
+    </div>
+
+    <div class="filters">
+
+        <!-- Category filter -->
+
+        <select
+            id="categoryFilter"
+            onchange="filterSpending()"
+        >
+
+            <option value="">All Categories</option>
+
+        </select>
+
+
+        <!-- Month filter -->
+
+        <input
+            type="month"
+            id="monthFilter"
+            onchange="filterSpending()"
+        >
+
+
+        <!-- Clear filters -->
+
+        <button
+            class="clear-button"
+            onclick="clearFilters()"
+        >
+            Clear Filters
+        </button>
+
+    </div>
+
+
+
+    <div class="total-box">
+
+        Total Spending:
+        $<span id="totalAmount">0.00</span>
+
+    </div>
+
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Name</th>
+
+                <th>Category</th>
+
+                <th>Amount</th>
+
+                <th>Date</th>
+
+                <th>Notes</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody id="spendingList">
+
+            <!-- Data will be inserted here -->
+
+        </tbody>
+
+    </table>
+
+    <div id="message">
+
+        Loading spending...
+
+    </div>
+
+
+    <script>
+
+        let spending = [];
+
+        async function loadSpending() {
+
+            const message =
+                document.getElementById("message");
+
+
+            try {
+
+                const response =
+                    await fetch("control.php");
+
+
+                // Check if PHP responded correctly
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "HTTP error: " + response.status
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                // Check PHP success
+
+                if (!data.success) {
+
+                    message.textContent =
+                        data.message;
+
+                    return;
+
+                }
+
+
+                // Store database data
+
+                spending = data.data;
+
+
+                // Create category options
+
+                createCategoryFilter();
+
+
+                // Display data
+
+                displaySpending(spending);
+
+
+                // Remove loading message
+
+                message.textContent = "";
+
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                message.textContent =
+                    "Something went wrong while loading the spending data.";
+
+            }
+
+        }
+
+// Filter
+
+        function createCategoryFilter() {
+
+            const categoryFilter =
+                document.getElementById("categoryFilter");
+
+
+            // Get all categories
+
+            const categories =
+                spending.map(function(item) {
+
+                    return String(item.category ?? "");
+
+                });
+
+
+            // Remove duplicates
+
+            const uniqueCategories =
+                [...new Set(categories)];
+
+
+            // Sort alphabetically
+
+            uniqueCategories.sort();
+
+
+            // Keep "All Categories"
+
+            categoryFilter.innerHTML = `
+                <option value="">All Categories</option>
+            `;
+
+
+            // Add each category
+
+            uniqueCategories.forEach(function(category) {
+
+                if (category === "") {
+                    return;
+                }
+
+
+                const option =
+                    document.createElement("option");
+
+
+                option.value = category;
+
+                option.textContent = category;
+
+
+                categoryFilter.appendChild(option);
+
+            });
+
+        }
+
+
+  
+
+        function displaySpending(spendingData) {
+
+            const spendingList =
+                document.getElementById("spendingList");
+
+
+            // Clear existing rows
+
+            spendingList.innerHTML = "";
+
+
+            // Reset total
+
+            let total = 0;
+
+
+            // No results
+
+            if (spendingData.length === 0) {
+
+                spendingList.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="no-data"
+                        >
+                            No spending records found.
+                        </td>
+
+                    </tr>
+
+                `;
+
+
+                document.getElementById("totalAmount")
+                    .textContent = "0.00";
+
+
+                return;
+
+            }
+
+
+            // Create rows
+
+            spendingData.forEach(function(item) {
+
+
+                // Get amount
+
+                const amount =
+                    parseFloat(item.amount) || 0;
+
+
+                // Add to total
+
+                total += amount;
+
+
+                // Create row
+
+                const row =
+                    document.createElement("tr");
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${escapeHTML(item.name)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(item.category)}
+                    </td>
+
+                    <td>
+                        $${amount.toFixed(2)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(item.date)}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(item.notes)}
+                    </td>
+
+                `;
+
+
+                spendingList.appendChild(row);
+
+            });
+
+
+            // Display total
+
+            document.getElementById("totalAmount")
+                .textContent = total.toFixed(2);
+
+        }
+
+
+        // FILTER SPENDING
+
+        function filterSpending() {
+
+
+            // Get search value
+
+            const search =
+                document.getElementById("search")
+                    .value
+                    .toLowerCase()
+                    .trim();
+
+
+            // Get category
+
+            const category =
+                document.getElementById("categoryFilter")
+                    .value
+                    .toLowerCase();
+
+
+            // Get month
+
+            const month =
+                document.getElementById("monthFilter")
+                    .value;
+
+
+            // Filter data
+
+            const filteredSpending =
+                spending.filter(function(item) {
+
+
+                    // SEARCH
+
+                    const name =
+                        String(item.name ?? "")
+                            .toLowerCase();
+
+
+                    const itemCategory =
+                        String(item.category ?? "")
+                            .toLowerCase();
+
+
+                    const amount =
+                        String(item.amount ?? "")
+                            .toLowerCase();
+
+
+                    const date =
+                        String(item.date ?? "")
+                            .toLowerCase();
+
+
+                    const notes =
+                        String(item.notes ?? "")
+                            .toLowerCase();
+
+
+                    const matchesSearch =
+
+                        name.includes(search)
+
+                        ||
+
+                        itemCategory.includes(search)
+
+                        ||
+
+                        amount.includes(search)
+
+                        ||
+
+                        date.includes(search)
+
+                        ||
+
+                        notes.includes(search);
+
+                    // CATEGORE
+                    const matchesCategory =
+
+                        category === ""
+
+                        ||
+
+                        itemCategory === category;
+
+
+            
+                    // MONTH
+               
+
+                    let matchesMonth = true;
+
+
+                    if (month !== "") {
+
+                        /*
+                         * month is YYYY-MM
+                         *
+                         * Example:
+                         * 2026-09
+                         */
+
+                        matchesMonth =
+                            String(item.date ?? "")
+                                .startsWith(month);
+
+                    }
+
+
+                    // FINAL RESULT
+        
+
+                    return (
+
+                        matchesSearch
+
+                        &&
+
+                        matchesCategory
+
+                        &&
+
+                        matchesMonth
+
+                    );
+
+                });
+
+
+            // Display filtered data
+
+            displaySpending(filteredSpending);
+
+        }
+
+
+     
+        // CLEAR FILTERS
+
+        function clearFilters() {
+
+            document.getElementById("search")
+                .value = "";
+
+
+            document.getElementById("categoryFilter")
+                .value = "";
+
+
+            document.getElementById("monthFilter")
+                .value = "";
+
+
+            displaySpending(spending);
+
+        }
+
+        // PREVENT HTML INJECTION
+
+        function escapeHTML(value) {
+
+            if (value === null || value === undefined) {
+
+                return "";
+
+            }
+
+
+            return String(value)
+
+                .replace(/&/g, "&amp;")
+
+                .replace(/</g, "&lt;")
+
+                .replace(/>/g, "&gt;")
+
+                .replace(/"/g, "&quot;")
+
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+   
+        // START
+
+
+        loadSpending();
+
+
+    </script>
+
+
+</body>
+
+</html>

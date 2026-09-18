@@ -4,7 +4,7 @@
 $host = "serverless-eastus.sysp0000.db3.skysql.com";
 $username = "dbpbf13797752";
 $password = "hi4n^iuoS84OsAi77d.qYC";
-$dbname = "warranty_db";
+$dbname = "spending";
 $port = 4009;
 
 $conn = mysqli_init();
@@ -47,7 +47,7 @@ $notes = $_POST["notes"];
 
 // Insert into database
 
-$sql = "INSERT INTO warranties
+$sql = "INSERT INTO spending
         (name, category, amount,date,notes)
         VALUES (?, ?, ?, ?, ?)";
 
@@ -56,7 +56,7 @@ $stmt = $conn->prepare($sql);
         die("Prepare failed: " . $conn->error);
     }
 $stmt->bind_param(
-    "ssssssss",
+    "sssss",
     $name,
     $category,
     $amount,
